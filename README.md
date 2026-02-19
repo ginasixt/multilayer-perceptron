@@ -41,20 +41,20 @@ The resulting value (weighted sum + bias) is passed through an activation functi
 ## How ReLU Enables Learning
 The Rectified Linear Unit (ReLU) activation function is defined as:
 
-\[
+$`
 f(z) = \max(0, z)
-\]
+`$ \
 
-- Outputs **0** if \( z \le 0 \) → the neuron is inactive for that forward pass  
-- Outputs \( z \) if \( z > 0 \) → the neuron becomes active and passes the value to the next layer  
+- Outputs $`0`$ if $` z \le 0 `$  → the neuron is inactive for that forward pass  
+- Outputs $` z `$ if $` z > 0 `$ → the neuron becomes active and passes the value to the next layer  
 
 For a neuron with pre-activation value
 
-\[
+$`
 z = w_1 x_1 + w_2 x_2 + \dots + b
-\]
+`$ \
 
-the neuron contributes to the next layer only if \( z > 0 \).
+the neuron contributes to the next layer only if $` z > 0`$ \
 
 ReLU does not explicitly encode logical rules such as  
 “high BMI + no exercise + age > 60”,  
@@ -77,15 +77,21 @@ ReLU transforms it to:
 
 so half or the values bacome zero.
 
-If this variance reduction accumulates across multiple layers this can cause a unstable variance throzghout the layers, the signal can progressively shrink, leading to vanishing gradients. Conversely, poorly scaled weights may cause activations to grow across layers, leading to exploding gradients. Therefore, it is desirable to keep the variance of activations approximately constant across layers.
+If this variance reduction accumulates across multiple layers this can cause a unstable variance throughout the layers, the signal can progressively shrink, leading to vanishing gradients. Conversely, poorly scaled weights can also cause activations to grow across layers, leading to exploding gradients. 
+
+If the variance sinks activations become increasingly close to zero, the gradients computed during backpropagation also shrink, this causes that the network may still technically train, but learning becomes very slow, early layers learn almost nothing, and the network behaves much shallower, no need for a deep network then if some layers do nothing.
+
+If the variance grows (exploding signal), activations become very large and gradients can grow exponentially during backpropagation, which leads to the exploding gradient problem which causes numerical instability (overflow, NaNs), extremely large parameter updates and diverging loss during training.
+
+Therefore, it is desirable to keep the variance of activations approximately constant across layers.
 
 Kaiming initialization addresses this issue by scaling the variance of the weights proportionally to:
 
-\[
+$`
 \frac{2}{n_{in}}
-\]
+`$ \
 
-where \( n_{in} \) is the number of input units. The factor 2 compensates for the expected variance reduction introduced by ReLU, helping to maintain stable signal propagation during both forward and backward passes.
+where $` n_{in} `$  is the number of input units. The factor 2 compensates for the expected variance reduction introduced by ReLU, helping to maintain stable signal propagation during both forward and backward passes.
 
 This is more important for deeper MLP, so I have not implemented it here, but still good to know :)
 
