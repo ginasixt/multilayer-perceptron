@@ -39,20 +39,56 @@ Each input is multiplied by the trainable weight, and a bias is added \
 The resulting value (weighted sum + bias) is passed through an activation function (e.g., ReLU and for the Output Layer Sigmoid) \
 
 ## How ReLU Enables Learning
-ReLU itself is simple:
+The Rectified Linear Unit (ReLU) activation function is defined as:
 
-- Outputs **0** if the input ≤ 0 --> the neuron does not influence the next layer  
-- Outputs the input > 0 --> the neuron **fires** and passes the input trough
+\[
+f(z) = \max(0, z)
+\]
 
-So applied to our neurons, if the **weighted sum of inputs** \
-$`w_1 x_1 + w_2 x_2 + ... + b`$ \
-exceeds the ReLU threshold (i.e., z > 0), the neuron becomes active (fires) and contributes to the next layer.
+- Outputs **0** if \( z \le 0 \) → the neuron is inactive for that forward pass  
+- Outputs \( z \) if \( z > 0 \) → the neuron becomes active and passes the value to the next layer  
 
-ReLU doesn't explicitly model logical rules like "high BMI + no exercise + age > 60",  
-but it allows them to develop. 
-The trained model adjusted the weights and biases so that only for such input combinations the activation threshold is crossed and the neuron fires.
+For a neuron with pre-activation value
+
+\[
+z = w_1 x_1 + w_2 x_2 + \dots + b
+\]
+
+the neuron contributes to the next layer only if \( z > 0 \).
+
+ReLU does not explicitly encode logical rules such as  
+“high BMI + no exercise + age > 60”,  
+but it enables such patterns to emerge during training. The network adjusts its weights and biases so that only specific combinations of inputs cause the neuron to activate.
 
 Without ReLU (or another non-linear activation function), even deep networks are only a single linear transformation, incapable of modeling complex relationships.
+
+## Variance and the Role of Kaiming Initialization
+
+ReLU changes the distribution of activations by setting all negative values to zero. 
+If the inputs to a layer are approximately symmetric around zero, about half of the values become zero after applying ReLU. In expectation, this reduces the variance of the activations by roughly a factor of one half.
+
+Like we have the following signal:
+
+[−2,−1,0,1,2]
+
+ReLU transforms it to:
+
+[0,0,0,1,2], 
+
+so half or the values bacome zero.
+
+If this variance reduction accumulates across multiple layers this can cause a unstable variance throzghout the layers, the signal can progressively shrink, leading to vanishing gradients. Conversely, poorly scaled weights may cause activations to grow across layers, leading to exploding gradients. Therefore, it is desirable to keep the variance of activations approximately constant across layers.
+
+Kaiming initialization addresses this issue by scaling the variance of the weights proportionally to:
+
+\[
+\frac{2}{n_{in}}
+\]
+
+where \( n_{in} \) is the number of input units. The factor 2 compensates for the expected variance reduction introduced by ReLU, helping to maintain stable signal propagation during both forward and backward passes.
+
+This is more important for deeper MLP, so I have not implemented it here, but still good to know :)
+
 
 ## How the training works
 The model is further optimized in each epoch cycle (i.e., a complete iteration over the training data set). The goal is to change the model parameters (weights and biases) so that the prediction comes closer and closer to the actual label.
